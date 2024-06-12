@@ -12,12 +12,13 @@ var stormaps = make(map[string]string, 10)
 
 func Record(date string, affairs string, stormaps map[string]string) {
 	stormaps[date] = affairs
-	fmt.Println("Новая запись в ежедневнике")
+	fmt.Println("Новая запись в ежедневнике =>", date, affairs)
 }
 
-func PrintStoremaps(stormaps map[string]string) {
+func PrintStoremaps(w http.ResponseWriter, stormaps map[string]string) {
 	for key, value := range stormaps {
-		fmt.Println(key, " : ", value)
+		fmt.Fprintf(w, "%s : %v\n", key, value)
+		fmt.Printf("%s : %v\n", key, value)
 	}
 }
 
@@ -34,12 +35,22 @@ func diaryHandler(w http.ResponseWriter, r *http.Request) {
 	date := r.FormValue("date")
 
 	Record(date, affairs, stormaps)
+}
 
-	PrintStoremaps(stormaps)
+func affairsHandler(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/allaffairs" {
+		http.Error(w, "404 not found", http.StatusNotFound)
+		return
+	}
+	if r.Method != "GET" {
+		http.Error(w, "Method is not supported.", http.StatusNotFound)
+	}
+	PrintStoremaps(w, stormaps)
 }
 
 func setHandlers(r *mux.Router) {
 	r.HandleFunc("/diary", diaryHandler)
+	r.HandleFunc("/allaffairs", affairsHandler)
 }
 
 func main() {
