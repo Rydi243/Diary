@@ -22,7 +22,7 @@ func Record(date string, affairs string, stormaps map[string]string) {
 func PrintStoremaps(w http.ResponseWriter, stormaps map[string]string) {
 	for key, value := range stormaps {
 		fmt.Fprintf(w, "%s : %v\n", key, value)
-		fmt.Printf("%s : %v\n", key, value)
+		//fmt.Printf("%s : %v\n", key, value)
 	}
 }
 
@@ -34,6 +34,7 @@ func diaryHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	if r.Method != "POST" {
 		http.Error(w, "Method is not supported.", http.StatusNotFound)
+		return
 	}
 
 	affairs := r.FormValue("affairs")
@@ -79,6 +80,7 @@ func HelloAdminFunc(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// Печать счётчика обращений
 func CounterHandler(w http.ResponseWriter, Counter map[string]int) {
 	fmt.Fprintln(w, Counter)
 }
