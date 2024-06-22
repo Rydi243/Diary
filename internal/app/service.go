@@ -1,16 +1,37 @@
 package app
 
 import (
-	"github.com/gorilla/mux"
 	"Diary/internal/app/middleware"
+	"Diary/internal/config"
+	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
-func SetHandlers(r *mux.Router) {
-	r.Use(middleware.CounterMiddleware)
-	r.Use(middleware.LogMiddlleware)
-	r.HandleFunc("/diary", DiaryHandler)
+type Service struct {
+	Port   string
+	router *mux.Router
+}
 
-	admin := r.PathPrefix("/admin").Subrouter()
+func NewServise() Service {
+	tmp := Service{
+		Port:   config.ServPort,
+		router: mux.NewRouter(),
+	}
+	tmp.SetHandlers()
+	return tmp
+}
+
+func (s Service) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	s.router.ServeHTTP(w, r)
+}
+
+func (s Service) SetHandlers() {
+	s.router.Use(middleware.CounterMiddleware)
+	s.router.Use(middleware.LogMiddlleware)
+	s.router.HandleFunc("/diary", DiaryHandler)
+
+	admin := s.router.PathPrefix("/admin").Subrouter()
 	admin.Use(middleware.AuthCheckMiddleware)
 
 	admin.HandleFunc("/allaffairs", HelloAdminFunc)
